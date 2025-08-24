@@ -24,7 +24,7 @@ import static org.awaitility.Awaitility.await;
 
 @Testcontainers
 @SpringBootTest
-class BeerServiceImplTest {
+public class BeerServiceImplTest {
 
     @Container
     @ServiceConnection
