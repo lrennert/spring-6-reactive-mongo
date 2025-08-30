@@ -99,8 +99,8 @@ class BeerEndpointTest {
     @Test
     @Order(3)
     void testUpdateBeer() {
-
         BeerDTO testBeer = getSavedTestBeer();
+        testBeer.setBeerName("New");
 
         webTestClient.put()
                 .uri(BeerRouterConfig.BEER_PATH_ID, testBeer.getId())
