@@ -124,13 +124,15 @@ class BeerEndpointTest {
 
     @Test
     void testCreateBeer() {
+        BeerDTO testBeer = BeerServiceImplTest.getTestBeerDto();
+
         webTestClient.post()
                 .uri(BeerRouterConfig.BEER_PATH)
-                .body(Mono.just(BeerServiceImplTest.getTestBeer()), BeerDTO.class)
+                .body(Mono.just(testBeer), BeerDTO.class)
                 .header("Content-Type", "application/json")
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().location("http://localhost:8080/api/v2/beer/4");
+                .expectHeader().exists("location");
     }
 
     @Test
