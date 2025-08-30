@@ -46,12 +46,13 @@ class BeerEndpointTest {
     @Test
     void testPatchIdFound() {
         BeerDTO testBeer = getSavedTestBeer();
+        testBeer.setBeerName("New");
 
         webTestClient.patch()
                 .uri(BeerRouterConfig.BEER_PATH_ID, testBeer.getId())
                 .body(Mono.just(testBeer), BeerDTO.class)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
     }
 
     @Test
