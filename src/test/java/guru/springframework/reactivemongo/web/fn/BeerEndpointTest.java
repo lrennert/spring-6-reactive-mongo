@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
 @Testcontainers
@@ -76,7 +78,7 @@ class BeerEndpointTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void testUpdateBeerBadRequest() {
         BeerDTO testBeer = getSavedTestBeer();
         testBeer.setBeerStyle("");
@@ -98,7 +100,7 @@ class BeerEndpointTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void testUpdateBeer() {
         BeerDTO testBeer = getSavedTestBeer();
         testBeer.setBeerName("New");
@@ -168,6 +170,29 @@ class BeerEndpointTest {
                 .expectBody().jsonPath("$.length()").value(greaterThan(1));
     }
 
+    @Test
+    @Order(3)
+    void testListBeersByStyle() {
+        final String BEER_STYLE = "TEST";
+        BeerDTO testBeer = getSavedTestBeer();
+        testBeer.setBeerStyle(BEER_STYLE);
+
+        // create test data
+        webTestClient.post().uri(BeerRouterConfig.BEER_PATH)
+                .body(Mono.just(testBeer), BeerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange();
+
+        webTestClient.get().uri(UriComponentsBuilder
+                        .fromPath(BeerRouterConfig.BEER_PATH)
+                        .queryParam("beerStyle", BEER_STYLE)
+                        .build().toUri())
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-type", "application/json")
+                .expectBody().jsonPath("$.length()").value(equalTo(1));
+    }
+
     public BeerDTO getSavedTestBeer() {
         FluxExchangeResult<BeerDTO> beerDTOFluxExchangeResult = webTestClient.post()
                 .uri(BeerRouterConfig.BEER_PATH)
@@ -182,5 +207,4 @@ class BeerEndpointTest {
                 .uri(BeerRouterConfig.BEER_PATH)
                 .exchange().returnResult(BeerDTO.class).getResponseBody().blockFirst();
     }
-
 }
