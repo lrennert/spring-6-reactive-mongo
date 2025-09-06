@@ -86,6 +86,20 @@ public class CustomerServiceImplTest {
         check();
     }
 
+    @Test
+    void testGetCustomerById() {
+        CustomerDTO customerDTO = getSavedCustomerDTO();
+
+        AtomicReference<CustomerDTO> atomicReference = new AtomicReference<>();
+
+        customerService.getCustomerById(customerDTO.getId())
+                .subscribe(atomicReference::set);
+
+        await().until(() -> atomicReference.get() != null);
+
+        assertThat(atomicReference.get()).isNotNull();
+    }
+
     private CustomerDTO getSavedCustomerDTO() {
         CustomerDTO customerDTO = customerService.createCustomer(Mono.just(getTestCustomerDTO())).block();
         Assertions.assertNotNull(customerDTO);
