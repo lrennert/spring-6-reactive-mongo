@@ -1,6 +1,7 @@
 package guru.springframework.reactivemongo.service;
 
 import guru.springframework.reactivemongo.model.CustomerDTO;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +30,19 @@ public class CustomerServiceImplTest {
 
     @Autowired
     CustomerService customerService;
+
+    private void check() {
+        AtomicReference<List<CustomerDTO>> atomicReference = new AtomicReference<>();
+
+        customerService.listCustomers()
+                .collectList()
+                .subscribe(atomicReference::set);
+
+        await().until(() -> atomicReference.get() != null);
+
+        System.out.printf(">>> Customer Total: %d%n", atomicReference.get().size());
+        atomicReference.get().forEach(System.out::println);
+    }
 
     @Test
     @DisplayName("Test Create Customer Using Block")
@@ -49,6 +65,33 @@ public class CustomerServiceImplTest {
         CustomerDTO persistedDTO = atomicReference.get();
         assertThat(persistedDTO).isNotNull();
         assertThat(persistedDTO.getId()).isNotNull();
+    }
+
+    @Test
+    void testListCustomers() {
+        check();
+        CustomerDTO customerDTO = getSavedCustomerDTO();
+
+        AtomicReference<List<CustomerDTO>> atomicReference = new AtomicReference<>();
+
+        customerService.listCustomers()
+                .collectList()
+                .subscribe(atomicReference::set);
+
+        await().until(() -> atomicReference.get() != null);
+
+        List<CustomerDTO> result = atomicReference.get();
+        assertThat(result.size()).isGreaterThanOrEqualTo(1);
+        assertThat(result).contains(customerDTO);
+        check();
+    }
+
+    private CustomerDTO getSavedCustomerDTO() {
+        CustomerDTO customerDTO = customerService.createCustomer(Mono.just(getTestCustomerDTO())).block();
+        Assertions.assertNotNull(customerDTO);
+        customerDTO.setCreatedDate(customerDTO.getCreatedDate().truncatedTo(ChronoUnit.MILLIS));
+        customerDTO.setLastModifiedDate(customerDTO.getLastModifiedDate().truncatedTo(ChronoUnit.MILLIS));
+        return customerDTO;
     }
 
     public static CustomerDTO getTestCustomerDTO() {

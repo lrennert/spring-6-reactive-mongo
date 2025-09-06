@@ -25,7 +25,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Flux<CustomerDTO> listCustomers() {
-        return null;
+        return customerRepository.findAll()
+                .map(customerMapper::customerToCustomerDto);
     }
 
     @Override
