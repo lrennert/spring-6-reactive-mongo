@@ -117,6 +117,19 @@ public class CustomerServiceImplTest {
         check();
     }
 
+    @Test
+    void testDeleteCustomerById() {
+        check();
+        CustomerDTO customerDTO = getSavedCustomerDTO();
+
+        customerService.deleteCustomerById(customerDTO.getId()).block();
+
+        CustomerDTO deletedCustomerDTO = customerService.getCustomerById(customerDTO.getId()).block();
+
+        assertThat(deletedCustomerDTO).isNull();
+        check();
+    }
+
     private CustomerDTO getSavedCustomerDTO() {
         CustomerDTO customerDTO = customerService.createCustomer(Mono.just(getTestCustomerDTO())).block();
         Assertions.assertNotNull(customerDTO);

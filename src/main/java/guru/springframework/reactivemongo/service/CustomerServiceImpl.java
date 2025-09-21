@@ -48,6 +48,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Mono<Void> deleteCustomerById(String customerId) {
-        return null;
+        return customerRepository.deleteById(customerId);
     }
 }
