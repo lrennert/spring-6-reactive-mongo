@@ -178,12 +178,14 @@ class BeerEndpointTest {
         testBeer.setBeerStyle(BEER_STYLE);
 
         // create test data
-        webTestClient.post().uri(BeerRouterConfig.BEER_PATH)
+        webTestClient.post()
+                .uri(BeerRouterConfig.BEER_PATH)
                 .body(Mono.just(testBeer), BeerDTO.class)
                 .header("Content-Type", "application/json")
                 .exchange();
 
-        webTestClient.get().uri(UriComponentsBuilder
+        webTestClient.get()
+                .uri(UriComponentsBuilder
                         .fromPath(BeerRouterConfig.BEER_PATH)
                         .queryParam("beerStyle", BEER_STYLE)
                         .build().toUri())

@@ -1,24 +1,32 @@
 package guru.springframework.reactivemongo.bootstrap;
 
 import guru.springframework.reactivemongo.domain.Beer;
+import guru.springframework.reactivemongo.domain.Customer;
 import guru.springframework.reactivemongo.repository.BeerRepository;
+import guru.springframework.reactivemongo.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class BootstrapData implements CommandLineRunner {
 
     private final BeerRepository beerRepository;
+    private final CustomerRepository customerRepository;
 
     @Override
     public void run(String... args) {
         beerRepository.deleteAll()
                 .doOnSuccess(success -> loadBeerData())
+                .subscribe();
+
+        customerRepository.deleteAll()
+                .doOnSuccess(success -> loadCustomerData())
                 .subscribe();
     }
 
@@ -60,6 +68,38 @@ public class BootstrapData implements CommandLineRunner {
                 beerRepository.save(beer3).subscribe(beer -> System.out.println(beer.toString()));
 
                 System.out.println("Loaded Beers: " + beerRepository.count().block());
+            }
+        });
+    }
+
+    private void loadCustomerData() {
+        customerRepository.count().subscribe(count -> {
+            if (count == 0) {
+                Customer customer1 = Customer.builder()
+                        .customerName("Iron Man")
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build();
+
+                Customer customer2 = Customer.builder()
+                        .customerName("Bruce Banner")
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build();
+
+                Customer customer3 = Customer.builder()
+                        .customerName("Captain America")
+                        .createdDate(LocalDateTime.now())
+                        .lastModifiedDate(LocalDateTime.now())
+                        .build();
+
+                List.of(customer1, customer2, customer3).forEach(
+                        customer -> customerRepository.save(customer).subscribe(savedCustomer ->
+                                System.out.printf(">>> BootstrapData - Saved Customer: %s%n", savedCustomer.toString())));
+
+                System.out.printf(">>> BootstrapData - Loaded Customers: %d%n", customerRepository.count().block());
+            } else {
+                System.out.printf(">>> BootstrapData - Existing Customers: %d%n", count);
             }
         });
     }
