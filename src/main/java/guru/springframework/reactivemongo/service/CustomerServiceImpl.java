@@ -37,7 +37,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Mono<CustomerDTO> updateCustomer(String customerId, CustomerDTO customerDTO) {
-        return null;
+        return customerRepository.findById(customerId)
+                .map(customer -> {
+                    customer.setCustomerName(customerDTO.getCustomerName());
+                    return customer;
+                })
+                .flatMap(customerRepository::save)
+                .map(customerMapper::customerToCustomerDto);
     }
 
     @Override

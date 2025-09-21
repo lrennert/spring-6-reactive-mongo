@@ -100,6 +100,23 @@ public class CustomerServiceImplTest {
         assertThat(atomicReference.get()).isNotNull();
     }
 
+    @Test
+    void testUpdateCustomer() {
+        check();
+        CustomerDTO customerDTO = getSavedCustomerDTO();
+        customerDTO.setCustomerName("New Name");
+
+        AtomicReference<CustomerDTO> atomicReference = new AtomicReference<>();
+
+        customerService.updateCustomer(customerDTO.getId(), customerDTO)
+                .subscribe(atomicReference::set);
+
+        await().until(() -> atomicReference.get() != null);
+
+        assertThat(atomicReference.get().getCustomerName()).isEqualTo("New Name");
+        check();
+    }
+
     private CustomerDTO getSavedCustomerDTO() {
         CustomerDTO customerDTO = customerService.createCustomer(Mono.just(getTestCustomerDTO())).block();
         Assertions.assertNotNull(customerDTO);
