@@ -65,6 +65,19 @@ class CustomerEndpointTest {
     }
 
     @Test
+    void testCreateCustomerBadRequest() {
+        CustomerDTO testCustomer = CustomerServiceImplTest.getTestCustomerDTO();
+        testCustomer.setCustomerName("");
+
+        webTestClient.post()
+                .uri(CustomerRouterConfig.CUSTOMER_PATH)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .header("Content-Type", "application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
     @Order(2)
     void testListCustomers() {
         check();
@@ -121,6 +134,19 @@ class CustomerEndpointTest {
                 .body(Mono.just(CustomerServiceImplTest.getTestCustomerDTO()), CustomerDTO.class)
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    @Order(4)
+    void testUpdateBeerBadRequest() {
+        CustomerDTO testCustomer = getSavedTestCustomer();
+        testCustomer.setCustomerName("");
+
+        webTestClient.put()
+                .uri(CustomerRouterConfig.CUSTOMER_PATH_ID, testCustomer)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test
